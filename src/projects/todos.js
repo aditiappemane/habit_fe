@@ -4,16 +4,24 @@ import "./todos.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-function TodoPage({ userId }) {
+function TodoPage({ userId ,onTodoAdded }) {
   const [task, setTask] = useState("");
   const [todos, setTodos] = useState([]);
   const [editId, setEditId] = useState(null);
   const [editTask, setEditTask] = useState("");
-  const [targetDays, setTargetDays] = useState("Every Day");
+  const [targetDays, setTargetDays] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [selectedDates, setSelectedDates] = useState([]);
   const [showCustomPopup, setShowCustomPopup] = useState(false);
-  const [customDays, setCustomDays] = useState([]);
+  const [customDays, setCustomDays] = useState([
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ]);
   const allDays = [
     "Sunday",
     "Monday",
@@ -27,33 +35,36 @@ useEffect(() => {
   console.log("from custom", customDays);
 }, [customDays]);
 
+const fetchTodos = async () => {
+  try {
+    const res = await axios.get(
+      `https://habit-be.onrender.com/api/todos?userId=${userId}`
+    );
+    setTodos(res.data);
+  } catch (err) {
+    alert("Failed to load todos");
+  }
+};
   useEffect(() => {
-    const fetchTodos = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:5000/api/todos?userId=${userId}`
-        );
-        setTodos(res.data);
-      } catch (err) {
-        alert("Failed to load todos");
-      }
-    };
-
-    fetchTodos();
+     fetchTodos();
   }, [userId]);
 
   const addTodo = async () => {
     if (!task.trim()) return;
+    console.log("customDays",customDays)
     try {
-      const res = await axios.post("http://localhost:5000/todos", {
+      const res = await axios.post("https://habit-be.onrender.com/todos", {
         task,
         userId,
         selectedDates,
-        targetDays: customDays.length ? customDays.join(", ") : targetDays,
+        targetDays: customDays,
         startDate,
       });
       console.log("from fetch", res.data);
+      
       setTodos([...todos, res.data]);
+      console.log("called the function")
+      onTodoAdded()
       setTask("");
     } catch (err) {
       console.error("Error adding todo:", err);
@@ -62,7 +73,7 @@ useEffect(() => {
 
   const toggleCompleted = async (id, currentStatus) => {
     try {
-      const res = await axios.patch(`http://localhost:5000/todos/${id}`, {
+      const res = await axios.patch(`https://habit-be.onrender.com/todos/${id}`, {
         completed: !currentStatus,
       });
       console.log("from toggle", res);
@@ -74,7 +85,7 @@ useEffect(() => {
 
   const editTodo = async (id) => {
     try {
-      const res = await axios.patch(`http://localhost:5000/todos/${id}`, {
+      const res = await axios.patch(`https://habit-be.onrender.com/todos/${id}`, {
         task: editTask,
       });
       console.log("from edit", res);
@@ -88,9 +99,10 @@ useEffect(() => {
 
   const deleteTodo = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/todos/${id}`);
+      await axios.delete(`https://habit-be.onrender.com/todos/${id}`);
 
       setTodos(todos.filter((todo) => todo._id !== id));
+      onTodoAdded()
     } catch (err) {
       console.error("Error deleting todo:", err);
     }
@@ -116,11 +128,10 @@ useEffect(() => {
             onChange={(e) => {
               const value = e.target.value;
               console.log("1", value);
-              setTargetDays(value);
-              if (value === "Every Day") {
-                setCustomDays(allDays);
+              if (value == "Every Day") {
+                setCustomDays([...allDays]);
                 setShowCustomPopup(false);
-              } else if (value === "Weekdays") {
+              } else if (value == "Weekdays") {
                 setCustomDays([
                   "Monday",
                   "Tuesday",
@@ -129,7 +140,7 @@ useEffect(() => {
                   "Friday",
                 ]);
                 setShowCustomPopup(false);
-              } else if (value === "Custom") {
+              } else if (value == "Custom") {
                 setCustomDays([]); // reset on new custom
                 setShowCustomPopup(true);
               }
@@ -210,34 +221,18 @@ useEffect(() => {
             <div className="todo-details">
               🎯 Target Days:{" "}
               {todo.targetDays
-                ? todo.targetDays.split(",").map((day) => (
+                ? todo.targetDays.map((day) => (
                     <span key={day} className="todo-day-chip">
-                      {day.trim()}
+                      {day}
                     </span>
                   ))
                 : "Not Set"}
             </div>
+           
             <div className="todo-details">
-              Start Date 📅 {todo.startDate || "Not Set"}
+            Start Date 📅 {todo.startDate ? todo.startDate.slice(0, 10) : "Not Set"}
             </div>
-            {editId === todo._id ? (
-              <button
-                onClick={() => editTodo(todo._id)}
-                className="todo-save-button"
-              >
-                Save
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  setEditId(todo._id);
-                  setEditTask(todo.task);
-                }}
-                className="todo-edit-button"
-              >
-                Edit
-              </button>
-            )}
+           
             <button
               onClick={() => deleteTodo(todo._id)}
               className="todo-delete-button"
