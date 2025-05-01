@@ -1,57 +1,61 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const TodayHabits = ({ userId }) => {
+  const TodayHabits = ({ userId ,refreshTrigger}) => {
   const [habits, setHabits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [statusMap, setStatusMap] = useState({});
   const [streaks, setStreaks] = useState({});
 
+  const fetchTodayHabitsAndStatuses = async () => {
+    try {
+      const res = await axios.get("https://habit-be.onrender.com/api/habits/today", {
+        params: { userId },
+      });
+      setHabits(res.data);
+
+      const statusRes = await axios.get("https://habit-be.onrender.com/api/habits/statuses", {
+        params: { userId },
+      });
+
+      const streakRes = await axios.get("https://habit-be.onrender.com/api/habits/streaks", {
+        params: { userId },
+      });
+      setStreaks(streakRes.data);
+
+      const map = {};
+      statusRes.data.forEach((entry) => {
+        map[entry.habitId.toString()] = entry.status;
+      });
+
+      setStatusMap(map);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load today's habits");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchTodayHabitsAndStatuses = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/api/habits/today", {
-          params: { userId },
-        });
-        setHabits(res.data);
-
-        const statusRes = await axios.get("http://localhost:5000/api/habits/statuses", {
-          params: { userId },
-        });
-
-        const streakRes = await axios.get("http://localhost:5000/api/habits/streaks", {
-          params: { userId },
-        });
-        setStreaks(streakRes.data);
-
-        const map = {};
-        statusRes.data.forEach((entry) => {
-          map[entry.habitId.toString()] = entry.status;
-        });
-
-        setStatusMap(map);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load today's habits");
-      } finally {
-        setLoading(false);
-      }
-    };
 
     if (userId) {
       fetchTodayHabitsAndStatuses();
     }
-  }, [userId]);
+  }, [userId,refreshTrigger]);
+
 
   const toggleStatus = async (habitId, status) => {
     try {
-      await axios.post("http://localhost:5000/api/habits/checkin", {
+      await axios.post("https://habit-be.onrender.com/api/habits/checkin", {
         habitId,
         userId,
         status,
       });
+      fetchTodayHabitsAndStatuses();
       setStatusMap((prev) => ({ ...prev, [habitId]: status }));
+
     } catch (err) {
       console.error("Error updating status:", err);
     }
