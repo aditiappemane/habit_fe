@@ -2,6 +2,7 @@ import React, { useState,useEffect } from "react";
 import axios from "axios";
 import TodoPage from "./projects/todos"; 
 import "./App.css";
+import HabitsToday from "./projects/track";
 
 function App() {
   const [showLogin, setShowLogin] = useState(true);
@@ -11,6 +12,7 @@ function App() {
   const [user, setUser] = useState(null); 
   const [errorMessage, setErrorMessage] = useState("");
 const [successMessage, setSuccessMessage] = useState("");
+const [userId, setUserId] = useState(null);
 
 
 
@@ -25,6 +27,7 @@ const [successMessage, setSuccessMessage] = useState("");
       
       // setSuccessMessage(res.data.message || "Login successful");
       setUser(res.data.userId); 
+      setUserId(res.data.userId);
       
 
     } catch (err) {
@@ -73,18 +76,26 @@ const [successMessage, setSuccessMessage] = useState("");
 
   if (user) {
     return (
-      <>
-        <button type="button" 
-        onClick={handleLogout} 
-        className="logout-button">
+      <div className="app-wrapper">
+        <button type="button" onClick={handleLogout} className="logout-button">
           Logout
         </button>
-        <TodoPage userId={user} />
-
-        
-      </>
+  
+        <div className="dashboard-container">
+          <div className="todo-section">
+            <TodoPage userId={user} />
+          </div>
+          <div className="dashboard-container">
+            <div className="today-section">
+            <HabitsToday userId={userId} />
+          </div>
+          </div>
+          
+        </div>
+      </div>
     );
   }
+  
 
  
   

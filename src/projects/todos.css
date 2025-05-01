@@ -141,27 +141,3 @@
   color: #fff;
   border: none;
 }
-.todo-add-date-button {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.todo-add-date-button:hover {
-  background-color: #45a049;
-}
-
-.todo-date-input {
-  margin-top: 10px;
-  width: 200px;
-}
-
-.todo-details {
-  font-size: 14px;
-  color: #555;
-  margin-top: 5px;
-  line-height: 1.4;
-}

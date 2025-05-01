@@ -4,7 +4,6 @@ import "./todos.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-
 function TodoPage({ userId }) {
   const [task, setTask] = useState("");
   const [todos, setTodos] = useState([]);
@@ -13,7 +12,20 @@ function TodoPage({ userId }) {
   const [targetDays, setTargetDays] = useState("Every Day");
   const [startDate, setStartDate] = useState("");
   const [selectedDates, setSelectedDates] = useState([]);
-
+  const [showCustomPopup, setShowCustomPopup] = useState(false);
+  const [customDays, setCustomDays] = useState([]);
+  const allDays = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+useEffect(() => {
+  console.log("from custom", customDays);
+}, [customDays]);
 
   useEffect(() => {
     const fetchTodos = async () => {
@@ -37,8 +49,10 @@ function TodoPage({ userId }) {
         task,
         userId,
         selectedDates,
+        targetDays: customDays.length ? customDays.join(", ") : targetDays,
+        startDate,
       });
-      console.log("from fetch",res.data)
+      console.log("from fetch", res.data);
       setTodos([...todos, res.data]);
       setTask("");
     } catch (err) {
@@ -51,7 +65,7 @@ function TodoPage({ userId }) {
       const res = await axios.patch(`http://localhost:5000/todos/${id}`, {
         completed: !currentStatus,
       });
-      console.log("from toggle",res)
+      console.log("from toggle", res);
       setTodos(todos.map((todo) => (todo._id === id ? res.data : todo)));
     } catch (err) {
       console.error("Error updating todo:", err);
@@ -63,7 +77,7 @@ function TodoPage({ userId }) {
       const res = await axios.patch(`http://localhost:5000/todos/${id}`, {
         task: editTask,
       });
-      console.log("from edit",res)
+      console.log("from edit", res);
       setTodos(todos.map((todo) => (todo._id === id ? res.data : todo)));
       setEditId(null);
       setEditTask("");
@@ -75,6 +89,7 @@ function TodoPage({ userId }) {
   const deleteTodo = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/todos/${id}`);
+
       setTodos(todos.filter((todo) => todo._id !== id));
     } catch (err) {
       console.error("Error deleting todo:", err);
@@ -95,15 +110,69 @@ function TodoPage({ userId }) {
           onChange={(e) => setTask(e.target.value)}
           className="todo-input"
         />
-        <select
-          value={targetDays}
-          onChange={(e) => setTargetDays(e.target.value)}
-          className="todo-select"
-        >
-          <option value="Every Day">Every Day</option>
-          <option value="Weekdays">Weekdays</option>
-          <option value="Custom">Custom</option>
-        </select>
+        <div className="todo-select-wrapper">
+          <select
+            value={targetDays}
+            onChange={(e) => {
+              const value = e.target.value;
+              console.log("1", value);
+              setTargetDays(value);
+              if (value === "Every Day") {
+                setCustomDays(allDays);
+                setShowCustomPopup(false);
+              } else if (value === "Weekdays") {
+                setCustomDays([
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                ]);
+                setShowCustomPopup(false);
+              } else if (value === "Custom") {
+                setCustomDays([]); // reset on new custom
+                setShowCustomPopup(true);
+              }
+            }}
+            className="todo-select"
+          >
+            <option value="Every Day">Every Day</option>
+            <option value="Weekdays">Weekdays</option>
+            <option value="Custom">Custom</option>
+          </select>
+
+          {/* ✅ Custom Popup outside the select */}
+          {showCustomPopup && (
+            <div className="custom-popup">
+              <h4>Select Custom Days</h4>
+              <div className="custom-days">
+                {allDays.map((day) => (
+                  <label key={day}>
+                    <input
+                      type="checkbox"
+                      checked={customDays.includes(day)}
+                      onChange={() =>
+                        setCustomDays((prev) =>
+                          prev.includes(day)
+                            ? prev.filter((d) => d !== day)
+                            : [...prev, day]
+                        )
+                      }
+                    />
+                    {day}
+                  </label>
+                ))}
+              </div>
+              <button
+                className="todo-popup-done-button"
+                onClick={() => setShowCustomPopup(false)}
+              >
+                Done
+              </button>
+            </div>
+          )}
+        </div>
+
         <input
           type="date"
           value={startDate}
@@ -138,7 +207,16 @@ function TodoPage({ userId }) {
                 {todo.task}
               </span>
             )}
-            <div className="todo-details">Target days🎯 {todo.targetDays}</div>
+            <div className="todo-details">
+              🎯 Target Days:{" "}
+              {todo.targetDays
+                ? todo.targetDays.split(",").map((day) => (
+                    <span key={day} className="todo-day-chip">
+                      {day.trim()}
+                    </span>
+                  ))
+                : "Not Set"}
+            </div>
             <div className="todo-details">
               Start Date 📅 {todo.startDate || "Not Set"}
             </div>
@@ -160,7 +238,6 @@ function TodoPage({ userId }) {
                 Edit
               </button>
             )}
-
             <button
               onClick={() => deleteTodo(todo._id)}
               className="todo-delete-button"
