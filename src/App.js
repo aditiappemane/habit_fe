@@ -11,16 +11,29 @@ function App() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [user, setUser] = useState(null); 
   const [errorMessage, setErrorMessage] = useState("");
-const [successMessage, setSuccessMessage] = useState("");
-const [userId, setUserId] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [userId, setUserId] = useState(null);
+  const [refreshHabits, setRefreshHabits] = useState(false);
 
+  const handleTodoAdded = () => {
+    // Toggle state to trigger re-render or useEffect in HabitsToday
+    console.log("changing")
+    setRefreshHabits(prev => !prev);
+  };
 
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("userId");
+    if (storedUserId) {
+      setUser(storedUserId);
+      setUserId(storedUserId);
+    }
+  }, []);
 
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res=await axios.post("http://localhost:5000/api/login",
+      const res=await axios.post("https://habit-be.onrender.com/api/login",
         { email, password },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -28,7 +41,7 @@ const [userId, setUserId] = useState(null);
       // setSuccessMessage(res.data.message || "Login successful");
       setUser(res.data.userId); 
       setUserId(res.data.userId);
-      
+      localStorage.setItem("userId", res.data.userId);
 
     } catch (err) {
       setErrorMessage(err.response?.data?.message || "Login failed");
@@ -42,7 +55,7 @@ const [userId, setUserId] = useState(null);
     }
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/signup",
+        "https://habit-be.onrender.com/api/signup",
         { email, password },
         {
           headers: {
@@ -58,6 +71,7 @@ const [userId, setUserId] = useState(null);
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("userId");
     setUser(null); 
     setEmail("");
     setPassword("");
@@ -82,16 +96,13 @@ const [userId, setUserId] = useState(null);
         </button>
   
         <div className="dashboard-container">
-          <div className="todo-section">
-            <TodoPage userId={user} />
-          </div>
-          <div className="dashboard-container">
-            <div className="today-section">
-            <HabitsToday userId={userId} />
-          </div>
-          </div>
-          
-        </div>
+      <div className="todo-section">
+        <TodoPage userId={user} onTodoAdded={handleTodoAdded} />
+      </div>
+      <div className="today-section">
+        <HabitsToday userId={user} refreshTrigger={refreshHabits} />
+      </div>
+    </div>
       </div>
     );
   }
