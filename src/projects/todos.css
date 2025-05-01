@@ -1,0 +1,167 @@
+/* Container styles */
+.todo-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Header styles */
+.todo-header {
+  text-align: center;
+  color: #343a40;
+  margin-bottom: 25px;
+}
+
+/* Input and Button container styles */
+/* Container layout */
+.todo-input-container {
+  display: flex;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+/* Input field */
+.todo-input,
+.todo-select,
+.todo-date-input {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+/* Optional: Add focus styles for better accessibility */
+.todo-input:focus,
+.todo-select:focus,
+.todo-date-input:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 3px rgba(76, 175, 80, 0.5);
+}
+
+/* Add button styles */
+.todo-add-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* List styles */
+.todo-list {
+  list-style: none;
+  padding: 0;
+  margin: 2rem auto;
+  max-width: 1000px;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+.todo-item {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr auto;
+  align-items: center;
+  gap: 12px;
+  background-color: #fff;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.todo-item:hover {
+  background-color: #f9f9f9;
+}
+
+.todo-task {
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+  word-break: break-word;
+}
+
+.todo-task.completed {
+  text-decoration: line-through;
+  color: #888;
+}
+
+.todo-edit-input {
+  grid-column: span 2;
+  font-size: 15px;
+  padding: 8px 10px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.todo-details {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  color: #666;
+  gap: 4px;
+}
+
+.todo-save-button,
+.todo-edit-button,
+.todo-delete-button {
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  margin-left: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* Existing button styles retained (optional enhancements) */
+.todo-save-button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+}
+
+.todo-edit-button {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.todo-delete-button {
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+}
+.todo-add-date-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.todo-add-date-button:hover {
+  background-color: #45a049;
+}
+
+.todo-date-input {
+  margin-top: 10px;
+  width: 200px;
+}
+
+.todo-details {
+  font-size: 14px;
+  color: #555;
+  margin-top: 5px;
+  line-height: 1.4;
+}
